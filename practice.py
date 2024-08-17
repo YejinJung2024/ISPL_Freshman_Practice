@@ -1,6 +1,5 @@
 import os
 import glob
-import path
 import cv2
 import numpy as np
 from collections import OrderedDict
@@ -26,44 +25,55 @@ def main():
 
     data_augment(image)
 
-
-
 def read_image_and_label(paths):
-    # TODO: with image folders path, read images and make label with image paths)
-    # DO NOT use dataset zoo from pytorch or tensorflow
-    images = None
-    labels = None
-    return images, labels
+    images = []
+    labels = []
 
+    for path in paths:
+        label = os.path.basename(os.path.dirname(path))
+        image = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
+        images.append(image)
+        labels.append(label)
+    
+    images = np.array(images)
+    labels = np.array(labels)
+    
+    return images, labels
 
 def save_npy(train_dataset, test_dataset):
     train_images, train_labels = train_dataset
     test_images, test_labels = test_dataset
 
-    np.save("./train_images.npy",train_images)
+    np.save("./train_images.npy", train_images)
     np.save("./test_images.npy", test_images)
     np.save("./train_labels.npy", train_labels)
     np.save("./test_labels.npy", test_labels)
 
 def read_npy():
-    # TODO: read npy files and return dictionary
-    """
-     data = {'train image': [train_images],
-             'train label': [train_labels],
-             'test_image': [test_images],
-             'test_label': [test_labels]
-            }
-     """
     data_dict = OrderedDict()
+    
+    data_dict['train_image'] = np.load("./train_images.npy")
+    data_dict['train_label'] = np.load("./train_labels.npy")
+    data_dict['test_image'] = np.load("./test_images.npy")
+    data_dict['test_label'] = np.load("./test_labels.npy")
+    
     return data_dict
 
 def save_pickle(data_dict):
-    # TODO: save data_dict as pickle (erase "return 0" when you finish write your code)
-    return 0
+    with open("./data_dict.pkl", 'wb') as file:
+        pickle.dump(data_dict, file)
 
 def data_augment(image):
-    # TODO: use cv2.flip, cv2.rotate, cv2.resize and save each augmented image
-    cv2.imwrite("./original.jpg",image)
+    cv2.imwrite("./original.jpg", image)
+
+    flipped_image = cv2.flip(image, 1)
+    cv2.imwrite("./flipped.jpg", flipped_image)
+
+    rotated_image = cv2.rotate(image, cv2.ROTATE_90_CLOCKWISE)
+    cv2.imwrite("./rotated.jpg", rotated_image)
+
+    resized_image = cv2.resize(image, (100, 100))
+    cv2.imwrite("./resized.jpg", resized_image)
 
 if __name__ == "__main__":
     main()
